@@ -1,6 +1,6 @@
 import React from 'react'
 
-const BlongTitles = () => {
+const BlogTitles = () => {
   return (
     <div>
       <h1>BlogTitles</h1>
@@ -8,4 +8,4 @@ const BlongTitles = () => {
   )
 }
 
-export default BlongTitles
+export default BlogTitles
