@@ -81,8 +81,8 @@ const Sidebar = ({ sidebar, setSidebar }) => {
             <p className="text-xs text-gray-500">
               <Protect plan="premium" fallback="Free">
                 Premium
-              </Protect>
-              Plan
+              </Protect>{" "}
+               Plan
             </p>
           </div>
         </div>
