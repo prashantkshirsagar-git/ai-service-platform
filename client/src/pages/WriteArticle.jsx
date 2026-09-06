@@ -22,6 +22,11 @@ const WriteArticle = () => {
           required
         />
         <p className="mt-4 text-sm font-medium">Article Length</p>
+        <div className="mt-3 flex gap-3 flex-wrap sm:max-w-9/11">
+          {articleLength.map((item, index)=>(
+            <span className="text-xs px-4 py-1 border rounded-full cursor-pointer" key={index}>{item.text}</span>
+          ))}
+        </div>
 
       </form>
 
