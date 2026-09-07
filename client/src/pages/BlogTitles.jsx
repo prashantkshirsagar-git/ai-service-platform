@@ -11,7 +11,7 @@ const BlogTitles = () => {
     "Travel",
     "Food",
   ];
-  const [selectedCategory, setselectedCategory] = useState("General");
+  const [selectedCategory, setSelectedCategory] = useState("General");
   const [input, setInput] = useState("");
   const onSubmitHandler = async (e) => {
     e.preventDefault();
@@ -40,7 +40,7 @@ const BlogTitles = () => {
         <div className="mt-3 flex gap-3 flex-wrap sm:max-w-9/11">
           {blogCategories.map((item) => (
             <span
-              onClick={() => setselectedCategory(item)}
+              onClick={() => setSelectedCategory(item)}
               className={`text-xs px-4 py-1 border rounded-full cursor-pointer ${
                selectedCategory === item
                   ? "bg-purple-50 text-purple-700"
