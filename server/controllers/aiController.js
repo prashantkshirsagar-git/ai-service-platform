@@ -34,6 +34,7 @@ export const generateArticle = async (req, res) => {
     });
 
     const content = response.choices[0].message.content;
+    
     await sql` INSERT INTO creations (user_id, prompt, content, type) 
     VALUES (${userId}, ${prompt}, ${content}, 'article')`;
     if (plan !== "premium") {
