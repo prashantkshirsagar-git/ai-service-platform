@@ -4,9 +4,12 @@ import { clerkClient } from "@clerk/express";
 import axios from "axios";
 import FormData from "form-data";
 import { v2 as cloudinary } from "cloudinary";
-import fs from 'fs'
-import pdf from 'pdf-parse/lib/pdf-parse.js'
+import fs from "fs";
+import { createRequire } from "module";
 
+
+const require = createRequire(import.meta.url); 
+const pdf = require("pdf-parse");
 const AI = new OpenAI({
   apiKey: process.env.GEMINI_API_KEY,
   baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
@@ -27,7 +30,7 @@ export const generateArticle = async (req, res) => {
     }
 
     const response = await AI.chat.completions.create({
-      model: "Gemini-3.8=Flash",
+      model: "gemini-3.6-flash", 
       messages: [
         {
           role: "user",
@@ -78,7 +81,7 @@ export const generateBlogTitle = async (req, res) => {
     }
 
     const response = await AI.chat.completions.create({
-      model: "Gemini-3.8-Flash",
+      model: "gemini-3.6-flash",
       messages: [
         {
           role: "user",
@@ -172,6 +175,11 @@ export const removeImageBackground = async (req, res) => {
     const plan = req.plan;
     const free_usage = req.free_usage;
 
+    
+    if (!image) {
+      return res.json({ success: false, message: "No image file received." });
+    }
+
     if (plan !== "premium" && free_usage >= 10) {
       return res.json({
         success: false,
@@ -209,10 +217,14 @@ export const removeImageBackground = async (req, res) => {
 export const removeImageObject = async (req, res) => {
   try {
     const { userId } = await req.auth();
-    const { object } = await req.body;
+    const { object } = req.body; 
     const image = req.file;
     const plan = req.plan;
     const free_usage = req.free_usage;
+
+    if (!image) {
+      return res.json({ success: false, message: "No image file received." });
+    }
 
     if (plan !== "premium" && free_usage >= 10) {
       return res.json({
@@ -222,10 +234,10 @@ export const removeImageObject = async (req, res) => {
     }
 
     const { public_id } = await cloudinary.uploader.upload(image.path);
-    const imageUrl= cloudinary.url(public_id,{
-      transformation:[{effect: `gen_remove:${object}`}],
-      resource_type: 'image'
-    })
+    const imageUrl = cloudinary.url(public_id, {
+      transformation: [{ effect: `gen_remove:${object}` }],
+      resource_type: "image",
+    });
 
     await sql`INSERT INTO creations (user_id, prompt, content, type)
    VALUES (${userId}, ${`Removed ${object} from image`}, ${imageUrl}, 'image')`;
@@ -238,13 +250,12 @@ export const removeImageObject = async (req, res) => {
       });
     }
 
-    res.json({ success: true, content: imageUrl});
+    res.json({ success: true, content: imageUrl });
   } catch (error) {
     console.log(error.message);
     res.json({ success: false, message: error.message });
   }
 };
-
 
 export const resumeReview = async (req, res) => {
   try {
@@ -252,6 +263,11 @@ export const resumeReview = async (req, res) => {
     const resume = req.file;
     const plan = req.plan;
     const free_usage = req.free_usage;
+
+    
+    if (!resume) {
+      return res.json({ success: false, message: "No resume file received." });
+    }
 
     if (plan !== "premium" && free_usage >= 10) {
       return res.json({
@@ -274,7 +290,7 @@ export const resumeReview = async (req, res) => {
 Resume Content:\n\n${pdfData.text}`;
 
     const response = await AI.chat.completions.create({
-      model: "gemini-3.8-flash",
+      model:"gemini-3.6-flash",
       messages: [
         {
           role: "user",
@@ -282,7 +298,7 @@ Resume Content:\n\n${pdfData.text}`;
         },
       ],
       temperature: 0.7,
-      max_tokens: 1000,
+      max_tokens: 3000,
     });
 
     const content = response.choices[0].message.content;

@@ -1,5 +1,13 @@
 import React, { useState } from "react";
 import { Edit, Sparkles } from "lucide-react";
+import axios from "axios";
+import { useAuth } from "@clerk/clerk-react";
+import toast from "react-hot-toast";
+
+
+const BASE_URL = (import.meta.env.VITE_BASE_URL || "http://localhost:3000").replace(/\/$/, "");
+axios.defaults.baseURL = BASE_URL;
+
 const WriteArticle = () => {
   const articleLength = [
     { length: 800, text: "Short (500-800 words)" },
@@ -8,11 +16,58 @@ const WriteArticle = () => {
   ];
   const [selectedLength, setSelectedLength] = useState(articleLength[0]);
   const [input, setInput] = useState("");
- const onSubmitHandler= async (e)=>{
-  e.preventDefault();
- }
+  const [loading, setLoading] = useState(false);
+  const [content, setContent] = useState("");
+  const { getToken } = useAuth();
 
+  const onSubmitHandler = async (e) => {
+    e.preventDefault();
 
+    
+    if (!import.meta.env.VITE_BASE_URL) {
+      console.warn(
+        "VITE_BASE_URL is not set. Falling back to", BASE_URL,
+        "- add VITE_BASE_URL to your .env file and restart the dev server."
+      );
+    }
+
+    try {
+      setLoading(true);
+      const prompt = `Write an article about ${input} in ${selectedLength.text}`;
+
+      const { data } = await axios.post(
+        "/api/ai/generate-article", 
+        { prompt, length: selectedLength.length },
+        {
+          headers: { Authorization: `Bearer ${await getToken()}` },
+          timeout: 60000, 
+        }
+      );
+
+      if (data.success) {
+        setContent(data.content);
+      } else {
+        toast.error(data.message || "Something went wrong generating the article.");
+      }
+    } catch (error) {
+      
+      if (error.response) {
+     
+        toast.error(error.response.data?.message || `Server error: ${error.response.status}`);
+      } else if (error.request) {
+        
+        toast.error(
+          `Could not reach the server at ${BASE_URL}. Is the backend running and CORS enabled?`
+        );
+      } else {
+        toast.error(error.message);
+      }
+      console.error("generate-article error:", error);
+    } finally {
+    
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="h-full overflow-y-scroll p-6 flex items-start flex-wrap gap-4 text-slate-700">
@@ -38,7 +93,11 @@ const WriteArticle = () => {
           {articleLength.map((item, index) => (
             <span
               onClick={() => setSelectedLength(item)}
-              className={`text-xs px-4 py-1 border rounded-full cursor-pointer ${selectedLength.text === item.text ? "bg-blue-50 text-blue-700" : " text-gray-500 border-gray-300"}`}
+              className={`text-xs px-4 py-1 border rounded-full cursor-pointer ${
+                selectedLength.text === item.text
+                  ? "bg-blue-50 text-blue-700"
+                  : " text-gray-500 border-gray-300"
+              }`}
               key={index}
             >
               {item.text}
@@ -47,25 +106,36 @@ const WriteArticle = () => {
         </div>
         <br />
         <button
+          disabled={loading}
           className="w-full flex justify-center items-center gap-2 
         bg-linear-to-r from-[#226BFF] to-[#65ADFF] text-white px-4 py-2 mt-6 text-sm rounded-lg cursor-pointer "
         >
-          <Edit className="w-5" />
+          {loading ? (
+            <span className="w-4 h-4 my-1 rounded-full border-2 border-t-transparent animate-spin"></span>
+          ) : (
+            <Edit className="w-5" />
+          )}
           Generate article
         </button>
       </form>
 
       <div className="w-full max-w-lg p-4 bg-white rounded-lg flex flex-col border border-gray-200 min-h-96 max-h-150">
-           <div className="flex items-center gap-3 ">
-            <Edit className="w-5 h-5 text-[#4A7AFF]" />
-            <h1 className="text-xl font-semibold">Generated article</h1>
-           </div>
-           <div className="flex-1 flex justify-center items-center">
+        <div className="flex items-center gap-3 ">
+          <Edit className="w-5 h-5 text-[#4A7AFF]" />
+          <h1 className="text-xl font-semibold">Generated article</h1>
+        </div>
+        {!content ? (
+          <div className="flex-1 flex justify-center items-center">
             <div className="text-sm flex flex-col items-center gap-5 text-gray-400">
               <Edit className="w-9 h-9" />
               <p>Enter a topic and click "Generate article" to get started</p>
             </div>
-           </div>
+          </div>
+        ) : (
+          <div className="mt-3 h-full overflow-y-scroll text-sm text-slate-600">
+            <div>{content}</div>
+          </div>
+        )}
       </div>
     </div>
   );
