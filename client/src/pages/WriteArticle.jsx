@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import Markdown from "react-markdown"
 
 
-const BASE_URL = (import.meta.env.VITE_BASE_URL || "http://localhost:3000").replace(/\/$/, "");
+const BASE_URL = import.meta.env.VITE_BASE_URL 
 axios.defaults.baseURL = BASE_URL;
 
 const WriteArticle = () => {
