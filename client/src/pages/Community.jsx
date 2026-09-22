@@ -2,12 +2,24 @@ import React, { useEffect, useState } from "react";
 import { dummyPublishedCreationData } from "../assets/assets";
 import { Heart } from "lucide-react";
 import { useUser } from "@clerk/clerk-react";
+import axios from "axios";
+import { useAuth } from "@clerk/clerk-react";
 
+
+const BASE_URL = import.meta.env.VITE_BASE_URL;
+axios.defaults.baseURL = BASE_URL;
 const Community = () => {
   const [creations, setCreations] = useState([]);
   const { user } = useUser();
+   const [loading, setLoading] = useState(true);
+   const { getToken } = useAuth();
   const fetchCreations = async () => {
-    setCreations(dummyPublishedCreationData);
+    try{
+      const {data} = await axios.get('/api/user/get-published-creations')
+    }
+    catch (error){
+
+    }
   };
   useEffect(() => {
     if (user) {
