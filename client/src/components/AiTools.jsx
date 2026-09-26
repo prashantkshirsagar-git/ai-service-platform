@@ -6,34 +6,37 @@ import { useUser } from "@clerk/clerk-react";
 const AiTools = () => {
   const navigate = useNavigate();
   const { user } = useUser();
+
   return (
-    <div className="px-4 sm:px-20 xl:px-32 my-24">
-      <div className="text-center">
-        <h2 className="text-shadow-700 text-[42px] font-semibold">
-          Powerful AI Tools
+    <div className="px-4 sm:px-20 xl:px-32 py-24">
+      <div className="text-center max-w-xl mx-auto">
+        <h2 className="font-display font-semibold tracking-tight text-4xl sm:text-5xl text-ink">
+          Powerful AI tools
         </h2>
-        <p className="text-gray-500 max-w-lg mx-auto">
-          Everything you need to create, enhance and optimize your content with
-          cutting-edge AI technology.
+        <p className="mt-4 text-gray-600">
+          Everything you need to create, enhance, and optimize your content —
+          in one workspace.
         </p>
       </div>
-      <div className="flex flex-wrap mt-10 justify-center">
+
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-14 max-w-5xl mx-auto">
         {AiToolsData.map((tool, index) => (
           <div
             key={index}
-            className="p-8 m-4 max-w-xs rounded-lg bg-[#FDFDFE]
-       shadow-lg border border-gray-100 
-       hover:-translate-y-1 transition-all duration-300 cursor-pointer"
             onClick={() => user && navigate(tool.path)}
+            className="p-6 rounded-xl bg-white border border-gray-100
+            hover:border-gray-200 hover:shadow-md transition-all duration-300 cursor-pointer"
           >
             <tool.Icon
-              className="w-12 h-12 p-3 text-white rounded-xl"
+              className="w-10 h-10 p-2.5 text-white rounded-lg"
               style={{
                 background: `linear-gradient(to bottom, ${tool.bg.from}, ${tool.bg.to})`,
               }}
             />
-            <h3 className="mt-6 mb-3 text-lg font-semibold">{tool.title}</h3>
-            <p className="text-gray-400 text-sm max-w-[95%]">
+            <h3 className="font-display font-semibold mt-5 mb-2 text-ink">
+              {tool.title}
+            </h3>
+            <p className="text-gray-500 text-sm leading-relaxed">
               {tool.description}
             </p>
           </div>
